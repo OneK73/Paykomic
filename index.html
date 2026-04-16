@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Access | Secure Payment</title>
+    <script src="https://applet.payherokenya.com/cdn/button_sdk.js?v=3.1"></script>
+    <style>
+        :root { --primary: #00a884; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 350px; }
+        h2 { color: #333; margin-bottom: 10px; }
+        p { color: #666; font-size: 14px; margin-bottom: 25px; }
+        #status-box { margin-top: 20px; padding: 10px; border-radius: 8px; display: none; background: #e7faf3; color: #00a884; font-weight: bold; border: 1px solid #00a884; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>VIP Group Access</h2>
+    <p>Pay <b>Ksh 1</b> via M-Pesa to unlock the WhatsApp group link.</p>
+    <div id="payHero-container"></div>
+    <div id="status-box">
+        <div class="loader"></div> <span id="status-text">Confirming payment...</span>
+    </div>
+</div>
+<script>
+    const MY_REF = "WA-" + Date.now();
+    const VERIFY_URL = "https://paykomic.onrender.com/verify?ref=" + MY_REF;
+
+    PayHero.init({
+        paymentUrl: "https://lipwa.link/7717",
+        containerId: "payHero-container",
+        channelID: 7717,
+        amount: 1,
+        reference: MY_REF,
+        name: "VIP Member",
+        buttonName: "Pay Ksh 1 to Join",
+        buttonColor: "#00a884",
+        callbackUrl: "/callback", // Node.js route
+        successUrl: window.location.href,
+        failedUrl: window.location.href
+    });
+
+    window.addEventListener('message', function(event) {
+        if (event.data.paymentSuccess) {
+            startVerification();
+        }
+    });
+
+    function startVerification() {
+        document.getElementById('status-box').style.display = 'block';
+        document.getElementById('payHero-container').style.display = 'none';
+        const checker = setInterval(async () => {
+            try {
+                const res = await fetch(VERIFY_URL);
+                const data = await res.json();
+                if (data.paid) {
+                    clearInterval(checker);
+                    document.getElementById('status-text').innerText = "Verified! Joining...";
+                    setTimeout(() => {
+                        window.location.href = data.link;
+                    }, 1500);
+                }
+            } catch (e) { console.log("Checking server..."); }
+        }, 3000);
+    }
+</script>
+</body>
+</html>
