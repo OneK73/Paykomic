@@ -17,7 +17,6 @@
     </style>
 </head>
 <body>
-
 <div class="card">
     <h2>VIP Group Access</h2>
     <p>Pay <b>Ksh 1</b> via M-Pesa to unlock the WhatsApp group link.</p>
@@ -26,10 +25,9 @@
         <div class="loader"></div> <span id="status-text">Confirming payment...</span>
     </div>
 </div>
-
 <script>
     const MY_REF = "WA-" + Date.now();
-    const VERIFY_URL = "http://braintechtest.unaux.com/verify.php?ref=" + MY_REF;
+    const VERIFY_URL = "/verify?ref=" + MY_REF;
 
     PayHero.init({
         paymentUrl: "https://lipwa.link/7717",
@@ -40,7 +38,7 @@
         name: "VIP Member",
         buttonName: "Pay Ksh 1 to Join",
         buttonColor: "#00a884",
-        callbackUrl: "http://braintechtest.unaux.com/callback.php",
+        callbackUrl: "/callback", // Node.js route
         successUrl: window.location.href,
         failedUrl: window.location.href
     });
@@ -54,12 +52,10 @@
     function startVerification() {
         document.getElementById('status-box').style.display = 'block';
         document.getElementById('payHero-container').style.display = 'none';
-        
         const checker = setInterval(async () => {
             try {
                 const res = await fetch(VERIFY_URL);
                 const data = await res.json();
-                
                 if (data.paid) {
                     clearInterval(checker);
                     document.getElementById('status-text').innerText = "Verified! Joining...";
@@ -67,9 +63,7 @@
                         window.location.href = data.link;
                     }, 1500);
                 }
-            } catch (e) {
-                console.log("Checking server...");
-            }
+            } catch (e) { console.log("Checking server..."); }
         }, 3000);
     }
 </script>
